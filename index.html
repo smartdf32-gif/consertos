@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b57d0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Consertos">
+<title>Consertos</title>
+<style>
+  :root { --azul:#0b57d0; --azul2:#0842a0; --claro:#e8f0fe; --fundo:#eef3fb; --borda:#d5deed; --erro:#b3261e; --ok:#12733a; --txt:#1b1f2a; --mudo:#667085; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; }
+  body { font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:var(--fundo); color:var(--txt);
+         padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+  .oculto { display:none !important; }
+
+  .topo { background:linear-gradient(135deg,var(--azul),var(--azul2)); color:#fff; display:flex; align-items:center; gap:14px;
+          padding:calc(18px + env(safe-area-inset-top)) 18px 34px; border-radius:0 0 26px 26px; }
+  .logo { width:50px; height:50px; border-radius:15px; background:#fff; color:var(--azul); display:flex; align-items:center;
+          justify-content:center; font-size:28px; font-weight:800; box-shadow:0 4px 12px rgba(0,0,0,.2); flex:none; }
+  .topo h1 { margin:0; font-size:20px; line-height:1.2; }
+  .topo p { margin:3px 0 0; font-size:13px; opacity:.85; }
+  main { max-width:560px; margin:-18px auto 0; padding:0 14px; }
+
+  .cartao { background:#fff; border:1px solid var(--borda); border-radius:18px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(16,24,40,.06); }
+  .cartao h2 { margin:0 0 12px; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .n { width:24px; height:24px; border-radius:50%; background:var(--azul); color:#fff; font-size:13px; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+  .obrig { color:var(--erro); }
+  .opc { color:var(--mudo); font-weight:400; font-size:13px; }
+
+  input[type=text], textarea { width:100%; padding:14px; font-size:17px; border:2px solid var(--borda); border-radius:14px; background:#fff; color:var(--txt); font-family:inherit; }
+  input[type=text]:focus, textarea:focus { outline:0; border-color:var(--azul); }
+  input.os { font-size:28px; font-weight:700; text-align:center; letter-spacing:1px; }
+  textarea { min-height:78px; resize:vertical; }
+  input[type=file] { display:none; }
+
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { padding:12px 16px; border-radius:999px; border:2px solid var(--borda); background:#fff; font-size:16px; font-weight:600; color:var(--txt); }
+  .chip.on { background:var(--azul); border-color:var(--azul); color:#fff; }
+
+  button.cam { width:100%; display:flex; align-items:center; gap:14px; padding:16px; border:2px dashed var(--azul); border-radius:16px;
+               background:var(--claro); color:var(--azul); text-align:left; font-family:inherit; }
+  button.cam .ic { font-size:32px; flex:none; }
+  button.cam b { display:block; font-size:17px; }
+  button.cam small { display:block; font-size:13px; font-weight:500; color:var(--mudo); margin-top:2px; word-break:break-all; }
+  button.cam.feito { border-style:solid; border-color:var(--ok); background:#e6f4ea; color:var(--ok); }
+
+  button.enviar { width:100%; margin-top:4px; padding:18px; font-size:18px; font-weight:700; color:#fff; background:var(--azul);
+                  border:0; border-radius:16px; box-shadow:0 4px 12px rgba(11,87,208,.3); font-family:inherit; }
+  button.enviar:disabled { background:#8fa8d6; box-shadow:none; }
+
+  .nav { position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; gap:8px; background:#fff; border-top:1px solid var(--borda);
+         padding:8px 10px calc(8px + env(safe-area-inset-bottom)); }
+  .nav button { flex:1; border:0; background:transparent; border-radius:14px; padding:8px 4px; font-size:13px; font-weight:700; color:var(--mudo);
+                display:flex; flex-direction:column; align-items:center; gap:2px; font-family:inherit; }
+  .nav .i { font-size:22px; }
+  .nav button.on { background:var(--claro); color:var(--azul); }
+
+  #msg { position:fixed; top:calc(12px + env(safe-area-inset-top)); left:12px; right:12px; z-index:60; max-width:536px; margin:0 auto;
+         padding:14px 16px; border-radius:14px; font-size:16px; font-weight:600; background:#fdecea; color:var(--erro);
+         border:1px solid #f3b8b4; box-shadow:0 6px 20px rgba(0,0,0,.18); }
+
+  .ov { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(10,20,40,.62); }
+  .ov-box { width:100%; max-width:380px; background:#fff; border-radius:24px; padding:28px 22px; text-align:center; }
+  .ov-box h3 { margin:14px 0 6px; font-size:20px; }
+  .ov-box p { margin:6px 0; color:var(--mudo); font-size:15px; }
+  .ov-box p.aviso { color:var(--erro); font-weight:600; }
+  .spin { width:52px; height:52px; margin:0 auto; border-radius:50%; border:5px solid var(--claro); border-top-color:var(--azul); animation:gira 1s linear infinite; }
+  @keyframes gira { to { transform:rotate(360deg); } }
+  .barra { height:12px; background:var(--claro); border-radius:8px; overflow:hidden; margin:16px 0 8px; }
+  .barra div { height:100%; width:0; background:var(--azul); transition:width .25s; }
+  .check { width:68px; height:68px; margin:0 auto; border-radius:50%; background:var(--ok); color:#fff; font-size:38px; line-height:68px; font-weight:700; }
+  .ov-box button.enviar { margin-top:18px; }
+</style>
+</head>
+<body>
+<div class="topo">
+  <div class="logo">S</div>
+  <div>
+    <h1>Smart Soluções</h1>
+    <p>Controle de Consertos</p>
+  </div>
+</div>
+
+<main>
+  <form id="fRec" novalidate>
+    <section class="cartao">
+      <h2><span class="n">1</span> Número da OS <span class="obrig">*</span></h2>
+      <input class="os" type="text" id="recOS" inputmode="numeric" autocomplete="off" placeholder="Ex.: 1234">
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">2</span> Quem está recebendo? <span class="obrig">*</span></h2>
+      <input type="hidden" id="recVend" value="">
+      <div class="chips" id="recChips"></div>
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">3</span> Vídeo do recebimento <span class="obrig">*</span></h2>
+      <input type="file" id="recVideo" accept="video/*" capture="environment">
+      <button type="button" class="cam" data-input="recVideo" data-ic="🎥" data-texto="Gravar vídeo" data-refazer="Gravar novamente" data-vazio="Toque para abrir a câmera">
+        <span class="ic">🎥</span><span><b>Gravar vídeo</b><small id="recVideoInfo">Toque para abrir a câmera</small></span>
+      </button>
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">4</span> Observação <span class="opc">(opcional)</span></h2>
+      <textarea id="recObs" placeholder="Aparelho, defeito relatado, acessórios deixados..."></textarea>
+    </section>
+
+    <button type="submit" class="enviar" id="btnRec">Enviar recebimento</button>
+  </form>
+
+  <form id="fEnt" class="oculto" novalidate>
+    <section class="cartao">
+      <h2><span class="n">1</span> Número da OS <span class="obrig">*</span></h2>
+      <input class="os" type="text" id="entOS" inputmode="numeric" autocomplete="off" placeholder="Ex.: 1234">
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">2</span> Quem está entregando? <span class="obrig">*</span></h2>
+      <input type="hidden" id="entVend" value="">
+      <div class="chips" id="entChips"></div>
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">3</span> Foto do checklist de teste <span class="obrig">*</span></h2>
+      <input type="file" id="entFoto" accept="image/*" capture="environment">
+      <button type="button" class="cam" data-input="entFoto" data-ic="📷" data-texto="Tirar foto" data-refazer="Tirar outra foto" data-vazio="Toque para abrir a câmera">
+        <span class="ic">📷</span><span><b>Tirar foto</b><small id="entFotoInfo">Toque para abrir a câmera</small></span>
+      </button>
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">4</span> Vídeo da entrega <span class="opc">(opcional)</span></h2>
+      <input type="file" id="entVideo" accept="video/*" capture="environment">
+      <button type="button" class="cam" data-input="entVideo" data-ic="🎥" data-texto="Gravar vídeo" data-refazer="Gravar novamente" data-vazio="Toque para abrir a câmera">
+        <span class="ic">🎥</span><span><b>Gravar vídeo</b><small id="entVideoInfo">Toque para abrir a câmera</small></span>
+      </button>
+    </section>
+
+    <section class="cartao">
+      <h2><span class="n">5</span> Observação <span class="opc">(opcional)</span></h2>
+      <textarea id="entObs" placeholder="Quem retirou, observações da entrega..."></textarea>
+    </section>
+
+    <button type="submit" class="enviar" id="btnEnt">Enviar entrega</button>
+  </form>
+</main>
+
+<nav class="nav">
+  <button type="button" id="tabRec" class="on"><span class="i">📥</span>Recebimento</button>
+  <button type="button" id="tabEnt"><span class="i">📤</span>Entrega</button>
+</nav>
+
+<div id="msg" class="oculto"></div>
+
+<div id="ov" class="ov oculto">
+  <div class="ov-box">
+    <div id="ovSend">
+      <div class="spin"></div>
+      <h3 id="ovTit">Enviando...</h3>
+      <div class="barra"><div id="ovBar"></div></div>
+      <p>Não feche nem bloqueie a tela até aparecer a confirmação.</p>
+    </div>
+    <div id="ovOk" class="oculto">
+      <div class="check">✓</div>
+      <h3 id="ovOkTit"></h3>
+      <p id="ovOkTxt"></p>
+      <p id="ovOkAv" class="aviso oculto"></p>
+      <button type="button" class="enviar" id="ovFechar">Novo registro</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbyiofz-OC0_dwzT2QVO84j9sG0DH4CmbioDYr006K8RsBsKyuD2o_NKJxP08xEWwtLF/exec';
+  const CHUNK = 8388608; /* 8 MB, múltiplo de 256 KB */
+  const VENDEDORES = ['Naide', 'Francisca Arlene', 'Natan', 'Michele', 'Ronilton', 'Rilary'];
+  let CHAVE = '';
+  try {
+    const q = new URLSearchParams(location.search).get('k');
+    if (q) { localStorage.setItem('chaveSmart', q.replace(/[^\w\-]/g, '')); history.replaceState(null, '', location.pathname); }
+    CHAVE = localStorage.getItem('chaveSmart') || '';
+  } catch (e) {}
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+  const $ = function (id) { return document.getElementById(id); };
+  let ocupado = false;
+  let toastT = null;
+
+  /* ---------- Vendedores (botões) ---------- */
+  ['rec', 'ent'].forEach(function (p) {
+    const box = $(p + 'Chips');
+    VENDEDORES.forEach(function (v) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = v;
+      b.addEventListener('click', function () {
+        if (ocupado) return;
+        $(p + 'Vend').value = v;
+        box.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === b); });
+      });
+      box.appendChild(b);
+    });
+  });
+
+  /* ---------- Abas ---------- */
+  function aba(qual) {
+    $('fRec').classList.toggle('oculto', qual !== 'rec');
+    $('fEnt').classList.toggle('oculto', qual !== 'ent');
+    $('tabRec').classList.toggle('on', qual === 'rec');
+    $('tabEnt').classList.toggle('on', qual === 'ent');
+    window.scrollTo({ top: 0 });
+  }
+  $('tabRec').onclick = function () { if (!ocupado) aba('rec'); };
+  $('tabEnt').onclick = function () { if (!ocupado) aba('ent'); };
+
+  /* ---------- Avisos e telas de envio ---------- */
+  function erro(texto) {
+    const m = $('msg');
+    m.textContent = texto;
+    m.classList.remove('oculto');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { m.classList.add('oculto'); }, 7000);
+  }
+
+  function envio(pct, titulo) {
+    $('ov').classList.remove('oculto');
+    $('ovSend').classList.remove('oculto');
+    $('ovOk').classList.add('oculto');
+    $('ovTit').textContent = titulo;
+    $('ovBar').style.width = pct + '%';
+  }
+
+  function sucesso(titulo, texto, aviso) {
+    $('ov').classList.remove('oculto');
+    $('ovSend').classList.add('oculto');
+    $('ovOk').classList.remove('oculto');
+    $('ovOkTit').textContent = titulo;
+    $('ovOkTxt').textContent = texto;
+    $('ovOkAv').textContent = aviso || '';
+    $('ovOkAv').classList.toggle('oculto', !aviso);
+  }
+
+  function fecharOv() { $('ov').classList.add('oculto'); }
+  $('ovFechar').onclick = function () { fecharOv(); window.scrollTo({ top: 0 }); };
+
+  /* ---------- Comunicação com o servidor ---------- */
+  async function srv(acao, dados) {
+    const corpo = Object.assign({ acao: acao, k: CHAVE }, dados || {});
+    let j = null;
+    for (let t = 1; t <= 3 && !j; t++) {
+      try {
+        const resp = await fetch(API, { method: 'POST', body: JSON.stringify(corpo), redirect: 'follow' });
+        j = JSON.parse(await resp.text());
+      } catch (e) {
+        j = null;
+        if (t === 3) throw new Error('Sem conexão com o servidor. Verifique a internet e tente de novo.');
+        await espera(1200 * t);
+      }
+    }
+    if (!j.ok) throw new Error(j.erro || 'Erro no servidor.');
+    return j.dados;
+  }
+
+  function espera(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  /* Envia uma parte direto para o Google Drive. Devolve {pronto, id}. */
+  function enviarParte(url, blob, inicio, total, aoProgredir) {
+    return new Promise(function (res, rej) {
+      const x = new XMLHttpRequest();
+      x.open('PUT', url);
+      x.setRequestHeader('Content-Range', 'bytes ' + inicio + '-' + (inicio + blob.size - 1) + '/' + total);
+      x.upload.onprogress = function (ev) { if (ev.lengthComputable) aoProgredir(ev.loaded); };
+      x.onload = function () {
+        if (x.status === 200 || x.status === 201) {
+          let id = '';
+          try { id = JSON.parse(x.responseText).id; } catch (e) {}
+          res({ pronto: true, id: id });
+        } else if (x.status === 308) { res({ pronto: false }); }
+        else { rej(new Error('Falha ao enviar (' + x.status + ').')); }
+      };
+      x.onerror = function () { rej(new Error('Conexão interrompida durante o envio.')); };
+      x.ontimeout = function () { rej(new Error('Tempo esgotado no envio.')); };
+      x.send(blob);
+    });
+  }
+
+  async function enviarArquivo(file, os, tipo, progresso) {
+    const ini = await srv('iniciar', { os: os, tipo: tipo, nome: file.name, mime: file.type || 'application/octet-stream', tamanho: file.size, origem: location.origin });
+    let inicio = 0, id = '';
+    while (inicio < file.size) {
+      const fim = Math.min(inicio + CHUNK, file.size);
+      const parte = file.slice(inicio, fim);
+      let r;
+      for (let t = 1; ; t++) {
+        try {
+          r = await enviarParte(ini.sessionUrl, parte, inicio, file.size, function (feito) { progresso(inicio + feito); });
+          break;
+        } catch (e) { if (t >= 4) throw e; await espera(1500 * t); }
+      }
+      inicio = fim;
+      progresso(inicio);
+      if (r.pronto) { id = r.id; break; }
+    }
+    if (inicio < file.size && !id) throw new Error('O envio de "' + file.name + '" não foi concluído. Tente novamente.');
+    if (!id) { const l = await srv('localizar', { os: os, nomeArq: ini.nome }); id = l.id; }
+    if (!id) throw new Error('Não foi possível confirmar o envio de "' + file.name + '".');
+    return id;
+  }
+
+  /* ---------- Envio ---------- */
+  function travar(sim) {
+    ocupado = sim;
+    $('btnRec').disabled = sim;
+    $('btnEnt').disabled = sim;
+    window.onbeforeunload = sim ? function () { return 'Envio em andamento.'; } : null;
+  }
+
+  async function processar(tipo) {
+    if (ocupado) return;
+    const rec = tipo === 'rec';
+    if (!CHAVE) {
+      const c = (prompt('Digite o código de acesso da loja:') || '').replace(/[^\w\-]/g, '');
+      if (c) { CHAVE = c; try { localStorage.setItem('chaveSmart', c); } catch (e) {} }
+    }
+    const os = ($(rec ? 'recOS' : 'entOS').value || '').trim();
+    const vend = $(rec ? 'recVend' : 'entVend').value;
+    const obs = ($(rec ? 'recObs' : 'entObs').value || '').trim();
+    const video = $(rec ? 'recVideo' : 'entVideo').files[0];
+    const foto = rec ? null : $('entFoto').files[0];
+
+    if (!CHAVE) return erro('Falta o código de acesso. Peça ao responsável.');
+    if (!os) return erro('Informe o número da OS.');
+    if (!vend) return erro('Escolha o vendedor.');
+    if (rec && !video) return erro('O vídeo do recebimento é obrigatório.');
+    if (!rec && !foto) return erro('A foto do checklist é obrigatória.');
+
+    travar(true);
+    try {
+      envio(0, 'Verificando a OS...');
+      const v = await srv('verificar', { os: os });
+      if (rec && v.existe) throw new Error('Já existe recebimento registrado para a OS ' + v.os + '.');
+      if (!rec && !v.existe && !confirm('Não há recebimento registrado para a OS ' + v.os + '. Enviar a entrega mesmo assim?')) {
+        fecharOv(); return;
+      }
+      if (!rec && v.entregue && !confirm('A OS ' + v.os + ' já tem uma entrega registrada. Substituir?')) {
+        fecharOv(); return;
+      }
+
+      const arquivos = rec ? [[video, 'recebimento']] : [[foto, 'checklist']].concat(video ? [[video, 'entrega']] : []);
+      const total = arquivos.reduce(function (s, a) { return s + a[0].size; }, 0);
+      let base = 0;
+      const mostrar = function (feito) {
+        const pct = Math.min(99, Math.round((base + feito) * 100 / total));
+        envio(pct, 'Enviando arquivos... ' + pct + '%');
+      };
+
+      envio(1, 'Enviando arquivos... 1%');
+      const ids = {};
+      for (const a of arquivos) {
+        ids[a[1]] = await enviarArquivo(a[0], os, a[1], mostrar);
+        base += a[0].size;
+      }
+
+      envio(100, 'Registrando na planilha...');
+      let r;
+      if (rec) {
+        r = await srv('recebimento', { d: { os: os, vendedor: vend, obs: obs, videoId: ids.recebimento } });
+      } else {
+        r = await srv('entrega', { d: { os: os, vendedor: vend, obs: obs, videoId: ids.entrega || '', checklistId: ids.checklist } });
+      }
+
+      $(rec ? 'fRec' : 'fEnt').reset();
+      sucesso(rec ? 'Recebimento registrado!' : 'Entrega registrada!',
+              'OS ' + r.os + ' · ' + r.quando,
+              r.semRecebimento ? 'Atenção: essa OS não tinha recebimento registrado.' : '');
+    } catch (e) {
+      fecharOv();
+      erro('Não foi possível concluir: ' + e.message);
+    } finally {
+      travar(false);
+    }
+  }
+
+  /* ---------- Botões que abrem a câmera direto ---------- */
+  function mb(n) { return (n / 1048576).toFixed(1).replace('.', ',') + ' MB'; }
+
+  function atualizarCam(btn) {
+    const inp = $(btn.dataset.input);
+    const info = $(btn.dataset.input + 'Info');
+    const f = inp.files[0];
+    btn.classList.toggle('feito', !!f);
+    btn.querySelector('.ic').textContent = f ? '✅' : btn.dataset.ic;
+    btn.querySelector('b').textContent = f ? btn.dataset.refazer : btn.dataset.texto;
+    info.textContent = f ? 'Pronto: ' + f.name + ' (' + mb(f.size) + ')' : btn.dataset.vazio;
+  }
+
+  document.querySelectorAll('button.cam').forEach(function (btn) {
+    const inp = $(btn.dataset.input);
+    btn.addEventListener('click', function () { if (!ocupado) inp.click(); });
+    inp.addEventListener('change', function () { atualizarCam(btn); });
+  });
+
+  [['fRec', 'rec'], ['fEnt', 'ent']].forEach(function (par) {
+    $(par[0]).addEventListener('reset', function () {
+      setTimeout(function () {
+        $(par[1] + 'Vend').value = '';
+        $(par[1] + 'Chips').querySelectorAll('.chip').forEach(function (c) { c.classList.remove('on'); });
+        $(par[0]).querySelectorAll('button.cam').forEach(atualizarCam);
+      }, 0);
+    });
+  });
+
+  $('fRec').addEventListener('submit', function (e) { e.preventDefault(); processar('rec'); });
+  $('fEnt').addEventListener('submit', function (e) { e.preventDefault(); processar('ent'); });
+</script>
+</body>
+</html>
